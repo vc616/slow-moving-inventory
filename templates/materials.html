@@ -1,0 +1,609 @@
+{% extends "base.html" %}
+
+{% block title %}物料信息采集系统 - 物料列表{% endblock %}
+
+{% block content %}
+<div class="materials-page">
+    <h2 class="section-title mobile-title">📋 物料列表</h2>
+
+    <div class="filters">
+        <div class="filter-row">
+            <div class="filter-group">
+                <select id="filterStatus" onchange="loadMaterials()">
+                    <option value="">全部状态</option>
+                    <option value="evaluated">已评估</option>
+                    <option value="not_evaluated">未评估</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select id="filterLetter" onchange="loadMaterials()">
+                    <option value="">全部字母</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-row">
+            <div class="filter-group search-input">
+                <input type="text" id="filterKeyword" placeholder="搜索编码/名称/规格" oninput="onKeywordInput()">
+            </div>
+        </div>
+        <div class="filter-row">
+            <div class="filter-group">
+                <select id="sortOrder" onchange="applySort()">
+                    <option value="total_amount_desc">总价↓</option>
+                    <option value="total_amount_asc">总价↑</option>
+                    <option value="code_asc">编码A-Z</option>
+                    <option value="code_desc">编码Z-A</option>
+                    <option value="name_asc">名称A-Z</option>
+                    <option value="quantity_desc">数量↓</option>
+                    <option value="quantity_asc">数量↑</option>
+                </select>
+            </div>
+            <span class="total-count"><span id="totalCount">0</span> 条</span>
+        </div>
+    </div>
+
+    <div class="materials-list" id="materialsList">
+        <div class="loading">加载中...</div>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<style>
+.materials-page {
+    padding: 15px;
+}
+
+.mobile-title {
+    display: none;
+}
+
+.filters {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group {
+    flex: 1;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+}
+
+.filter-group input {
+    min-width: 0;
+}
+
+.search-input {
+    flex: 2;
+}
+
+.total-count {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.total-count span {
+    font-weight: bold;
+    color: #667eea;
+}
+
+.materials-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.material-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.material-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.material-code {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 15px;
+}
+
+.material-status {
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.material-status.evaluated {
+    background: #e8f5e9;
+    color: #4CAF50;
+}
+
+.material-status.not_evaluated {
+    background: #fff3e0;
+    color: #ff9800;
+}
+
+.material-name {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.material-spec {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.material-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.material-info-item {
+    background: #f5f5f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.material-info-item .label {
+    color: #999;
+}
+
+.material-info-item .value {
+    color: #333;
+    font-weight: 500;
+}
+
+.material-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+}
+
+.material-amount {
+    font-size: 14px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    background: #667eea;
+    color: white;
+}
+
+.loading {
+    text-align: center;
+    color: #999;
+    padding: 40px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.pagination button.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Desktop: show table view */
+@media (min-width: 769px) {
+    .materials-page {
+        padding: 0;
+    }
+
+    .mobile-title {
+        display: block;
+    }
+
+    .filters {
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .filter-row {
+        margin-bottom: 0;
+    }
+
+    .filter-group {
+        flex: none;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        width: auto;
+        min-width: 120px;
+    }
+
+    .search-input {
+        flex: 1;
+    }
+
+    .search-input input {
+        min-width: 200px;
+    }
+
+    .total-count {
+        margin-left: auto;
+    }
+
+    .materials-list {
+        display: table;
+        width: 100%;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .material-card {
+        display: table-row;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .material-card > div {
+        display: table-cell;
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+
+    .material-card:last-child > div {
+        border-bottom: none;
+    }
+
+    .material-card-header {
+        margin-bottom: 0;
+    }
+
+    .material-card:hover {
+        background: #f8f9fa;
+    }
+
+    .material-info {
+        display: none;
+    }
+
+    .material-card-footer {
+        display: table-cell;
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+    }
+}
+
+/* Mobile: hide table header */
+@media (max-width: 768px) {
+    .materials-page {
+        padding: 10px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PAGE_SIZE = 30;
+let currentPage = 1;
+let allMaterials = [];
+let isDesktop = window.innerWidth >= 769;
+
+function updateLayoutMode() {
+    isDesktop = window.innerWidth >= 769;
+    renderMaterials();
+}
+
+window.addEventListener('resize', updateLayoutMode);
+
+function onKeywordInput() {
+    clearTimeout(window.keywordTimeout);
+    window.keywordTimeout = setTimeout(() => {
+        currentPage = 1;
+        loadMaterials();
+    }, 300);
+}
+
+async function loadMaterials() {
+    try {
+        const statusFilter = document.getElementById('filterStatus').value;
+        const letterFilter = document.getElementById('filterLetter').value;
+        const keyword = document.getElementById('filterKeyword').value.trim();
+
+        let allData = [];
+        let skip = 0;
+        const limit = 500;
+
+        while (true) {
+            let url = `/materials/?skip=${skip}&limit=${limit}`;
+            if (keyword) {
+                url = `/materials/?keyword=${encodeURIComponent(keyword)}&skip=${skip}&limit=${limit}`;
+            }
+
+            const response = await apiRequest(url);
+            if (!response.ok) break;
+
+            const data = await response.json();
+            const items = Array.isArray(data) ? data : data.materials || [];
+            allData.push(...items);
+
+            if (items.length < limit) break;
+            skip += limit;
+        }
+
+        allMaterials = allData;
+
+        if (letterFilter) {
+            allMaterials = allMaterials.filter(m => m.code && m.code[0].toUpperCase() === letterFilter);
+        }
+
+        if (statusFilter) {
+            if (statusFilter === 'evaluated') {
+                allMaterials = allMaterials.filter(m => m.has_inventory);
+            } else {
+                allMaterials = allMaterials.filter(m => !m.has_inventory);
+            }
+        }
+
+        currentPage = 1;
+        applySort();
+    } catch (error) {
+        console.error('加载物料失败:', error);
+        document.getElementById('materialsList').innerHTML = '<div class="loading">加载失败</div>';
+    }
+}
+
+function applySort() {
+    const sortOrder = document.getElementById('sortOrder').value;
+
+    allMaterials.sort((a, b) => {
+        switch (sortOrder) {
+            case 'total_amount_desc':
+                return (parseFloat(b.total_amount) || 0) - (parseFloat(a.total_amount) || 0);
+            case 'total_amount_asc':
+                return (parseFloat(a.total_amount) || 0) - (parseFloat(b.total_amount) || 0);
+            case 'code_asc':
+                return (a.code || '').localeCompare(b.code || '');
+            case 'code_desc':
+                return (b.code || '').localeCompare(a.code || '');
+            case 'name_asc':
+                return (a.name || '').localeCompare(b.name || '');
+            case 'quantity_desc':
+                return (parseFloat(b.quantity) || 0) - (parseFloat(a.quantity) || 0);
+            case 'quantity_asc':
+                return (parseFloat(a.quantity) || 0) - (parseFloat(b.quantity) || 0);
+            default:
+                return 0;
+        }
+    });
+
+    renderMaterials();
+}
+
+function formatAmount(val) {
+    if (!val || val === '-' || val === '无') return '-';
+    const num = parseFloat(val);
+        return isNaN(num) ? val : num.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+function renderMaterials() {
+    const listEl = document.getElementById('materialsList');
+    document.getElementById('totalCount').textContent = allMaterials.length;
+
+    const totalPages = Math.ceil(allMaterials.length / PAGE_SIZE);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    const pageMaterials = allMaterials.slice(start, end);
+
+    if (pageMaterials.length === 0) {
+        listEl.innerHTML = '<div class="loading">暂无数据</div>';
+        renderPagination(totalPages);
+        return;
+    }
+
+    if (isDesktop) {
+        // Desktop: table layout
+        listEl.innerHTML = `
+            <div class="material-card" style="display:table-row;background:#f8f9fa;font-weight:600;color:#333;">
+                <div style="width:12%;">编码</div>
+                <div style="width:15%;">名称</div>
+                <div style="width:20%;">规格</div>
+                <div style="width:6%;">单位</div>
+                <div style="width:8%;">数量</div>
+                <div style="width:10%;">总价</div>
+                <div style="width:8%;">状态</div>
+                <div style="width:21%;">操作</div>
+            </div>
+            ${pageMaterials.map(m => `
+                <div class="material-card">
+                    <div style="width:12%;">${escapeHtml(m.code || '-')}</div>
+                    <div style="width:15%;">${escapeHtml(m.name || '-')}</div>
+                    <div style="width:20%;">${escapeHtml(m.spec || '-')}</div>
+                    <div style="width:6%;">${escapeHtml(m.unit || '-')}</div>
+                    <div style="width:8%;">${escapeHtml(m.quantity || '-')}</div>
+                    <div style="width:10%;">${formatAmount(m.total_amount)}</div>
+                    <div style="width:8%;">
+                        <span class="material-status ${m.has_inventory ? 'evaluated' : 'not_evaluated'}">
+                            ${m.has_inventory ? '已评估' : '未评估'}
+                        </span>
+                    </div>
+                    <div style="width:21%;">
+                        <button class="action-btn" onclick="viewDetail('${m.code}')">查看详情</button>
+                    </div>
+                </div>
+            `).join('')}
+        `;
+    } else {
+        // Mobile: card layout
+        listEl.innerHTML = pageMaterials.map(m => `
+            <div class="material-card" onclick="viewDetail('${m.code}')">
+                <div class="material-card-header">
+                    <span class="material-code">${escapeHtml(m.code || '-')}</span>
+                    <span class="material-status ${m.has_inventory ? 'evaluated' : 'not_evaluated'}">
+                        ${m.has_inventory ? '已评估' : '未评估'}
+                    </span>
+                </div>
+                <div class="material-name">${escapeHtml(m.name || '-')}</div>
+                <div class="material-spec">${escapeHtml(m.spec || '-')}</div>
+                <div class="material-info">
+                    <span class="material-info-item">
+                        <span class="label">单位:</span>
+                        <span class="value">${escapeHtml(m.unit || '-')}</span>
+                    </span>
+                    <span class="material-info-item">
+                        <span class="label">数量:</span>
+                        <span class="value">${escapeHtml(m.quantity || '-')}</span>
+                    </span>
+                    <span class="material-info-item">
+                        <span class="label">总价:</span>
+                        <span class="value">${formatAmount(m.total_amount)}</span>
+                    </span>
+                </div>
+                <div class="material-card-footer">
+                    <span class="material-amount">¥${formatAmount(m.total_amount)}</span>
+                    <button class="action-btn" onclick="event.stopPropagation();viewDetail('${m.code}')">查看详情</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+    const pagination = document.getElementById('pagination');
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+    html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一页</button>`;
+
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) {
+        startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    if (startPage > 1) {
+        html += `<button onclick="goToPage(1)">1</button>`;
+        if (startPage > 2) html += `<button disabled>...</button>`;
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<button onclick="goToPage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) html += `<button disabled>...</button>`;
+        html += `<button onclick="goToPage(${totalPages})">${totalPages}</button>`;
+    }
+
+    html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一页</button>`;
+    pagination.innerHTML = html;
+}
+
+function goToPage(page) {
+    currentPage = page;
+    renderMaterials();
+    window.scrollTo(0, 0);
+}
+
+function viewDetail(code) {
+    window.location.href = `/?material_code=${code}`;
+}
+
+function escapeHtml(text) {
+    if (!text) return '-';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function initPage() {
+    const letterSelect = document.getElementById('filterLetter');
+    const response = await apiRequest('/stats/categories');
+    if (response.ok) {
+        const data = await response.json();
+        data.categories.forEach(cat => {
+            letterSelect.innerHTML += `<option value="${cat.letter}">${cat.letter} (${cat.total})</option>`;
+        });
+    }
+
+    loadMaterials();
+}
+
+document.addEventListener('DOMContentLoaded', initPage);
+</script>
+{% endblock %}

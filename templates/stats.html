@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}物料信息采集系统 - 分类统计{% endblock %}
+
+{% block content %}
+<div class="stats-page">
+    <div class="stats-header">
+        <h2 class="section-title">📊 分类统计</h2>
+
+        <div class="overall-progress-card">
+            <div class="progress-ring-container">
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle class="progress-ring-bg" cx="60" cy="60" r="54"/>
+                    <circle class="progress-ring-fill" cx="60" cy="60" r="54" id="progressRing"/>
+                </svg>
+                <div class="progress-center">
+                    <div class="progress-percent" id="overallProgress">0%</div>
+                    <div class="progress-label">完成率</div>
+                </div>
+            </div>
+            <div class="overall-stats">
+                <div class="stat-item">
+                    <div class="stat-dot evaluated"></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalEvaluated">0</div>
+                        <div class="stat-label">已评估</div>
+                    </div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-dot not-evaluated"></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalNotEvaluated">0</div>
+                        <div class="stat-label">未评估</div>
+                    </div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <div class="stat-dot total"></div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="totalMaterials">0</div>
+                        <div class="stat-label">物料总数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="overall-progress-bar">
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill evaluated" id="progressBarEvaluated"></div>
+                    <div class="progress-bar-fill not-evaluated" id="progressBarNotEvaluated"></div>
+                </div>
+                <div class="progress-bar-labels">
+                    <span><span class="dot"></span>已评估 <span id="evalPercent">0%</span></span>
+                    <span><span class="dot"></span>未评估 <span id="notEvalPercent">0%</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title" style="margin: 30px 0 20px;">按首字母分类</div>
+
+    <div class="category-grid" id="categoryGrid">
+    </div>
+</div>
+
+<style>
+.stats-page {
+    padding: 20px;
+}
+
+.stats-header {
+    margin-bottom: 10px;
+}
+
+.overall-progress-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 25px;
+}
+
+.progress-ring-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+}
+
+.progress-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-ring-bg {
+    fill: none;
+    stroke: #f0f0f0;
+    stroke-width: 10;
+}
+
+.progress-ring-fill {
+    fill: none;
+    stroke: url(#progressGradient);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 339.292;
+    stroke-dashoffset: 339.292;
+    transition: stroke-dashoffset 1s ease;
+}
+
+.progress-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-percent {
+    font-size: 28px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.progress-label {
+    font-size: 12px;
+    color: #999;
+}
+
+.overall-stats {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    min-width: 120px;
+}
+
+.stat-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.stat-dot.evaluated {
+    background: #4CAF50;
+}
+
+.stat-dot.not-evaluated {
+    background: #ff9800;
+}
+
+.stat-dot.total {
+    background: #667eea;
+}
+
+.stat-info {
+    text-align: left;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #888;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 40px;
+    background: #eee;
+    align-self: center;
+}
+
+.overall-progress-bar {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.progress-bar-track {
+    height: 16px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    transition: width 0.8s ease;
+}
+
+.progress-bar-fill.evaluated {
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+}
+
+.progress-bar-fill.not-evaluated {
+    background: linear-gradient(90deg, #ff9800, #FFB74D);
+}
+
+.progress-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.progress-bar-labels .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.progress-bar-labels span:first-child .dot {
+    background: #4CAF50;
+}
+
+.progress-bar-labels span:last-child .dot {
+    background: #ff9800;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.category-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.category-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.category-letter {
+    font-size: 32px;
+    font-weight: 800;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.category-ratio {
+    text-align: right;
+}
+
+.category-ratio .current {
+    font-size: 20px;
+    font-weight: 700;
+    color: #4CAF50;
+}
+
+.category-ratio .total {
+    font-size: 13px;
+    color: #999;
+}
+
+.category-progress {
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.category-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+
+.category-bottom {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #888;
+}
+
+.category-bottom span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.category-bottom .evaluated-count {
+    color: #4CAF50;
+    font-weight: 500;
+}
+
+.category-bottom .not-evaluated-count {
+    color: #ff9800;
+}
+
+@media (max-width: 768px) {
+    .stats-page {
+        padding: 15px;
+    }
+
+    .overall-progress-card {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .progress-ring-container {
+        width: 120px;
+        height: 120px;
+    }
+
+    .overall-stats {
+        width: 100%;
+    }
+
+    .stat-item {
+        flex: 1;
+        min-width: 0;
+        padding: 10px;
+    }
+
+    .stat-value {
+        font-size: 20px;
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .category-card {
+        padding: 15px;
+    }
+
+    .category-letter {
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+    }
+}
+</style>
+
+<svg style="position:absolute;width:0;height:0">
+    <defs>
+        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#667eea"/>
+            <stop offset="100%" style="stop-color:#764ba2"/>
+        </linearGradient>
+    </defs>
+</svg>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadStats() {
+    if (!currentToken) {
+        await login();
+    }
+
+    try {
+        const response = await apiRequest('/stats/categories');
+        if (response.ok) {
+            const data = await response.json();
+            renderStats(data);
+        }
+    } catch (error) {
+        console.error('加载统计失败:', error);
+    }
+}
+
+function renderStats(data) {
+    const total = data.total_materials;
+    const evaluated = data.total_evaluated;
+    const notEvaluated = data.total_not_evaluated;
+    const progress = data.overall_progress;
+
+    document.getElementById('totalMaterials').textContent = total;
+    document.getElementById('totalEvaluated').textContent = evaluated;
+    document.getElementById('totalNotEvaluated').textContent = notEvaluated;
+    document.getElementById('overallProgress').textContent = progress + '%';
+
+    const circumference = 2 * Math.PI * 54;
+    const offset = circumference - (progress / 100) * circumference;
+    document.getElementById('progressRing').style.strokeDashoffset = offset;
+
+    const evalPercent = total > 0 ? (evaluated / total * 100).toFixed(1) : 0;
+    const notEvalPercent = (100 - evalPercent).toFixed(1);
+    document.getElementById('progressBarEvaluated').style.width = evalPercent + '%';
+    document.getElementById('progressBarNotEvaluated').style.width = notEvalPercent + '%';
+    document.getElementById('evalPercent').textContent = evalPercent + '%';
+    document.getElementById('notEvalPercent').textContent = notEvalPercent + '%';
+
+    const grid = document.getElementById('categoryGrid');
+    grid.innerHTML = data.categories.map(cat => `
+        <div class="category-card">
+            <div class="category-top">
+                <div class="category-letter">${cat.letter}</div>
+                <div class="category-ratio">
+                    <div class="current">${cat.evaluated}</div>
+                    <div class="total">/ ${cat.total}</div>
+                </div>
+            </div>
+            <div class="category-progress">
+                <div class="category-progress-fill" style="width: ${cat.progress}%"></div>
+            </div>
+            <div class="category-bottom">
+                <span class="evaluated-count">✓ ${cat.evaluated}</span>
+                <span class="not-evaluated-count">○ ${cat.not_evaluated}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', loadStats);
+</script>
+{% endblock %}

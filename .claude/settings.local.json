@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat -ano)",
+      "Bash(tasklist)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://localhost:8501)",
+      "Bash(curl *)",
+      "Bash(taskkill //F //PID 13464)",
+      "Bash(taskkill //F //PID 16948)",
+      "Bash(\"D:/【11】Code/【1】project/呆滞物料信息系统/venv/Scripts/python.exe\" -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --log-level info)",
+      "Bash(taskkill //F //PID 18780)",
+      "Bash(taskkill //F //PID 3820)",
+      "Bash(\"D:/【11】Code/【1】project/呆滞物料信息系统/venv/Scripts/python.exe\" -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload)",
+      "Bash(taskkill //F //PID 8704)",
+      "Bash(taskkill //F //PID 13572)",
+      "Bash(taskkill //F //PID 20752)",
+      "Bash(taskkill //F //T //PID 8704)",
+      "Bash(powershell *)",
+      "Bash(tasklist //V //FI \"PID eq 8704\")",
+      "Bash(wmic process *)",
+      "Bash(\"D:/【11】Code/【1】project/呆滞物料信息系统/venv/Scripts/python.exe\" -c \"from app.database import engine; from sqlalchemy import inspect; i = inspect\\(engine\\); print\\([c['name'] for c in i.get_columns\\('materials'\\)]\\)\")",
+      "Bash(taskkill //F //PID 6020)",
+      "Bash(\"D:/【11】Code/【1】project/呆滞物料信息系统/venv/Scripts/python.exe\" -c \"from app.database import engine; from sqlalchemy import inspect; i = inspect\\(engine\\); print\\([c['name'] for c in i.get_columns\\('inventory_records'\\)]\\)\")",
+      "Bash(\"D:/【11】Code/【1】project/呆滞物料信息系统/venv/Scripts/python.exe\" -c \"from app.database import DATABASE_URL; print\\(DATABASE_URL\\)\")",
+      "Bash(tasklist //V //FI \"IMAGENAME eq python.exe\")",
+      "Bash(taskkill //F //FI \"IMAGENAME eq python.exe\")",
+      "Bash(python -m uvicorn app.main:app --host 0.0.0.0 --port 8001)",
+      "Bash(git init *)",
+      "Bash(gh auth *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git config *)"
+    ]
+  }
+}

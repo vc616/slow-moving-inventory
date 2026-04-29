@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}物料信息采集系统 - 首页{% endblock %}
+
+{% block content %}
+<div class="search-section">
+    <div class="search-header">
+        <h2 class="section-title">🔍 物料查询</h2>
+        <div class="search-toolbar">
+            <label class="toggle-switch">
+                <input type="checkbox" id="hideInventoried" checked onchange="onHideInventoriedChange()">
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">隐藏已盘库物料</span>
+        </div>
+    </div>
+    <div class="search-wrapper">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="输入关键词搜索（编码、名称、规格）..." autocomplete="off">
+        </div>
+        <div id="suggestionsBox" class="suggestions-box hidden"></div>
+    </div>
+    <div id="materialList" class="material-list hidden"></div>
+</div>
+
+<div id="materialDetail" class="material-detail"></div>
+
+<div id="photoModal" class="modal" onclick="closePhotoModal(event)">
+    <span class="modal-close" onclick="closePhotoModal(event)">&times;</span>
+    <img id="modalImage" class="modal-content" onclick="event.stopPropagation()">
+    <div id="modalCaption" class="modal-caption"></div>
+</div>
+{% endblock %}
