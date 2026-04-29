@@ -16,7 +16,7 @@
 |------|------|
 | 后端 | FastAPI (异步支持，高并发) |
 | 数据库 | SQLite |
-| 前端 | Streamlit (原生移动端适配) |
+| 前端 | Jinja2 模板 + 原生 JavaScript |
 | 认证 | JWT Token |
 
 ## 快速启动
@@ -31,17 +31,16 @@ pip install -r requirements.txt
 
 **Windows:**
 ```bash
-启动.bat
+.\venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-**Linux/Mac:**
+**或使用 8001 端口（如果 8000 被占用）:**
 ```bash
-chmod +x 启动.sh
-./启动.sh
+.\venv\Scripts\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8001
 ```
 
 启动后访问:
-- 前端页面: http://localhost:8501
+- 前端页面: http://localhost:8000
 - API文档: http://localhost:8000/docs
 
 ### 3. 默认账户
@@ -90,14 +89,14 @@ chmod +x 启动.sh
 
 ```bash
 # 使用ngrok
-ngrok http 8501
+ngrok http 8000
 
 # 或使用frp等工具
 ```
 
 ### 使用反向代理
 
-推荐使用 Nginx 反向代理到 8501 端口。
+推荐使用 Nginx 反向代理到 8000 端口。
 
 ## 目录结构
 
@@ -114,15 +113,23 @@ ngrok http 8501
 │   ├── routers/
 │   │   ├── auth.py       # 认证API
 │   │   ├── materials.py  # 物料API
-│   │   └── inventory.py  # 盘库API
+│   │   ├── inventory.py  # 盘库API
+│   │   └── stats.py      # 统计API
 │   └── utils/
 │       ├── file_lock.py  # 文件锁
 │       └── excel_loader.py # Excel导入
-├── photos/               # 照片存储
-├── data/                 # 数据库存储
-├── streamlit_app.py      # 前端页面
+├── templates/            # Jinja2 模板
+│   ├── base.html        # 基础模板
+│   ├── index.html       # 主页/物料详情
+│   ├── materials.html   # 物料列表
+│   └── stats.html       # 分类统计
+├── static/              # 静态资源
+│   ├── css/style.css    # 样式
+│   └── js/main.js       # 前端脚本
+├── photos/              # 照片存储
+├── data/                # 数据库存储
 ├── requirements.txt     # 依赖列表
-└── 启动.bat             # Windows启动脚本
+└── CLAUDE.md            # 项目指南
 ```
 
 ## 数据备份
