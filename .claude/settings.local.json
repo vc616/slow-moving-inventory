@@ -34,7 +34,9 @@
       "Bash(git remote *)",
       "Bash(git branch *)",
       "Bash(git push *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "WebFetch(domain:github.com)",
+      "Bash(claude /plugin marketplace add forrestchang/andrej-karpathy-skills)"
     ]
   }
 }
