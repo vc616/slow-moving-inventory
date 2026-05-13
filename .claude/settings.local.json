@@ -36,7 +36,14 @@
       "Bash(git push *)",
       "Bash(git commit *)",
       "WebFetch(domain:github.com)",
-      "Bash(claude /plugin marketplace add forrestchang/andrej-karpathy-skills)"
+      "Bash(claude /plugin marketplace add forrestchang/andrej-karpathy-skills)",
+      "WebFetch(domain:agent-skills.cc)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebSearch",
+      "Bash(git clone *)",
+      "Bash(mkdir -p ~/.config/claude-code/skills)",
+      "Bash(cp -r /tmp/awesome-claude-skills/* ~/.config/claude-code/skills/)",
+      "Bash(where claude *)"
     ]
   }
 }
